@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Абетка-Тренажер для Малят 🔤</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a1c4fd 100%);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .font-comfortaa {
+      font-family: 'Comfortaa', cursive;
+    }
+    .letter-card {
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .letter-card:hover {
+      transform: translateY(-8px) scale(1.05);
+    }
+    .letter-card:active {
+      transform: translateY(2px) scale(0.98);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+    .wiggle {
+      animation: wiggle 1s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen p-4 sm:p-6 justify-between">
+
+  <!-- Header -->
+  <header class="max-w-4xl mx-auto w-full flex items-center justify-between bg-white/70 backdrop-blur-md px-6 py-4 rounded-3xl shadow-xl border-2 border-white/60 mb-6">
+    <div class="flex items-center gap-3">
+      <span class="text-4xl wiggle">🎨</span>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-comfortaa text-indigo-700 leading-tight">Весела Абетка</h1>
+        <p class="text-xs sm:text-sm font-bold text-indigo-500">Вивчаємо літери та звуки разом!</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="playRandomLetter()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-black px-4 py-2 rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-sm sm:text-base border-2 border-amber-200">
+        <i class="fa-solid fa-shuffle"></i>
+        <span class="hidden sm:inline">Випадкова літера</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Alphabet Grid -->
+  <main class="max-w-4xl mx-auto w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 my-auto">
+    <!-- Dynamic Cards Inserted Here via JS -->
+  </main>
+
+  <!-- Modal Dialog for Letter Card -->
+  <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-300 relative text-center animate-pop">
+      
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all active:scale-90">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Modal Content -->
+      <div class="flex justify-center items-baseline gap-3 mb-2">
+        <span id="modalLetter" class="text-6xl sm:text-8xl font-black text-indigo-600 font-comfortaa">А</span>
+        <span id="modalWord" class="text-2xl sm:text-3xl font-bold text-amber-500">Апельсин</span>
+      </div>
+
+      <!-- Emoji Display -->
+      <div id="modalEmoji" class="text-7xl sm:text-9xl my-4 transform hover:scale-110 transition-transform cursor-pointer" onclick="speakCurrentWord()">
+        🍊
+      </div>
+
+      <!-- Poem Box -->
+      <div class="bg-indigo-50 border-2 border-indigo-200 p-4 rounded-2xl mb-6">
+        <p id="modalRhyme" class="text-lg sm:text-xl font-bold text-indigo-900 leading-snug">
+          Соковитий апельсин<br>Сонцю посміхнувся син!
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="speakCurrentLetter()" class="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white font-black py-3 px-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-base border-b-4 border-teal-700">
+          <i class="fa-solid fa-volume-high text-xl"></i>
+          <span>Озвучити назву</span>
+        </button>
+
+        <button onclick="speakCurrentSound()" class="bg-gradient-to-r from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600 text-white font-black py-3 px-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-base border-b-4 border-indigo-700">
+          <i class="fa-solid fa-comment-dots text-xl"></i>
+          <span>Вимовити звук</span>
+        </button>
+      </div>
+
+      <!-- Speak Poem Full Button -->
+      <button onclick="speakCurrentPoem()" class="w-full mt-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black py-3 px-4 rounded-2xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 text-base border-b-4 border-amber-600">
+        <i class="fa-solid fa-music text-lg"></i>
+        <span>Прослухати віршик</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="max-w-4xl mx-auto w-full text-center mt-6 text-indigo-950 font-bold text-sm bg-white/40 backdrop-blur-sm py-2 px-4 rounded-full">
+    Натискай на картки літер, аби слухати їх вимову та віршики! ✨
+  </footer>
+
+  <script>
+    /* ===================================================================
+       ALPHABET DATABASE
+       =================================================================== */
+    const ALPHABET = [
+      { letter: 'А', sound: 'а', word: 'Апельсин', emoji: '🍊', color: 'from-amber-400 to-orange-500', rhyme: 'Соковитий апельсин\nСонцю посміхнувся син!' },
+      { letter: 'Б', sound: 'б', word: 'Бджола', emoji: '🐝', color: 'from-yellow-400 to-amber-500', rhyme: 'Бджолка весело літає,\nМід із квіточок збирає.' },
+      { letter: 'В', sound: 'в', word: 'Вовк', emoji: '🐺', color: 'from-blue-400 to-indigo-500', rhyme: 'Сірий вовк у лісі бродить,\nДружбу з малятами водить.' },
+      { letter: 'Г', sound: 'г', word: 'Гарбуз', emoji: '🎃', color: 'from-orange-400 to-red-500', rhyme: 'Ходить гарбуз по городу,\nПитається свого роду.' },
+      { letter: 'Ґ', sound: 'ґ', word: 'Ґанок', emoji: '🏡', color: 'from-emerald-400 to-teal-500', rhyme: 'На високий зручний ґанок\nПрилетів пташок світанок.' },
+      { letter: 'Д', sound: 'д', word: 'Дім', emoji: '🏠', color: 'from-pink-400 to-rose-500', rhyme: 'Теплий дім у нас є свій,\nПовний посмішок і мрій.' },
+      { letter: 'Е', sound: 'е', word: 'Екскаватор', emoji: '🚜', color: 'from-sky-400 to-blue-500', rhyme: 'Екскаватор яму копа,\nБудівельникам допомога!' },
+      { letter: 'Є', sound: 'є', word: 'Єнот', emoji: '🦝', color: 'from-purple-400 to-indigo-500', rhyme: 'Милий полоскун єнот\nЗаспівав для нас із нот.' },
+      { letter: 'Ж', sound: 'ж', word: 'Жук', emoji: '🪲', color: 'from-lime-400 to-green-500', rhyme: 'Жук літає: «Жу-жу-жу! \nЯ із дітками дружу!»' },
+      { letter: 'З', sound: 'з', word: 'Заєць', emoji: '🐰', color: 'from-teal-400 to-cyan-500', rhyme: 'Зайчик стриб та зайчик скок,\nЗаховався за кусток.' },
+      { letter: 'И', sound: 'и', word: 'Ирій', emoji: '🕊️', color: 'from-cyan-400 to-blue-500', rhyme: 'Пташки в ирій відлітають,\nТепле сонечко вітають.' },
+      { letter: 'І', sound: 'і', word: 'Іграшка', emoji: '🧸', color: 'from-rose-400 to-pink-500', rhyme: 'Іграшки мої чудові,\nКольорові та нові.' }
+    ];
+
+    let currentItem = null;
+
+    /* ===================================================================
+       SYNTHESIZED AUDIO EFFECTS (Web Audio API)
+       =================================================================== */
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playPopSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    /* ===================================================================
+       WEB SPEECH API LOGIC (Ukrainian Speech Synthesis)
+       =================================================================== */
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) {
+        alert('Ваш браузер не підтримує озвучення через Web Speech API.');
+        return;
+      }
+
+      window.speechSynthesis.cancel(); // Stop ongoing speech
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'uk-UA';
+      utterance.rate = 0.85; // Slightly slower for clear child comprehension
+      utterance.pitch = 1.15; // Friendly higher pitch for kids
+
+      // Try selecting Ukrainian voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const ukVoice = voices.find(v => v.lang.includes('uk') || v.lang.includes('UA'));
+      if (ukVoice) {
+        utterance.voice = ukVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakCurrentLetter() {
+      if (!currentItem) return;
+      speakText(`${currentItem.letter}! Починається слово ${currentItem.word}`);
+    }
+
+    function speakCurrentSound() {
+      if (!currentItem) return;
+      speakText(`Звук ${currentItem.sound}`);
+    }
+
+    function speakCurrentWord() {
+      if (!currentItem) return;
+      speakText(currentItem.word);
+    }
+
+    function speakCurrentPoem() {
+      if (!currentItem) return;
+      speakText(`${currentItem.rhyme}`);
+    }
+
+    /* ===================================================================
+       UI & MODAL RENDER
+       =================================================================== */
+    function renderGrid() {
+      const main = document.querySelector('main');
+      main.innerHTML = '';
+
+      ALPHABET.forEach((item, index) => {
+        const card = document.createElement('button');
+        card.className = `letter-card bg-gradient-to-br ${item.color} text-white p-4 rounded-3xl shadow-lg border-4 border-white/60 flex flex-col items-center justify-between aspect-square`;
+        card.onclick = () => openModal(item);
+
+        card.innerHTML = `
+          <div class="text-4xl sm:text-5xl font-black font-comfortaa drop-shadow-md">${item.letter}</div>
+          <div class="text-4xl sm:text-5xl my-1 transform group-hover:scale-110 transition-transform">${item.emoji}</div>
+          <div class="text-xs sm:text-sm font-bold bg-white/30 px-3 py-1 rounded-full backdrop-blur-sm shadow-inner">${item.word}</div>
+        `;
+
+        main.appendChild(card);
+      });
+    }
+
+    function openModal(item) {
+      currentItem = item;
+      playPopSound();
+
+      document.getElementById('modalLetter').textContent = item.letter;
+      document.getElementById('modalWord').textContent = item.word;
+      document.getElementById('modalEmoji').textContent = item.emoji;
+      document.getElementById('modalRhyme').innerHTML = item.rhyme.replace('\n', '<br>');
+
+      const modal = document.getElementById('modal');
+      modal.classList.remove('hidden');
+
+      // Automatically speak the letter on open
+      setTimeout(() => {
+        speakCurrentLetter();
+      }, 200);
+    }
+
+    function closeModal() {
+      playPopSound();
+      window.speechSynthesis.cancel();
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function playRandomLetter() {
+      const randomIndex = Math.floor(Math.random() * ALPHABET.length);
+      openModal(ALPHABET[randomIndex]);
+    }
+
+    // Ensure voices are loaded for SpeechSynthesis
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    // Initialize layout
+    window.onload = () => {
+      renderGrid();
+    };
+  </script>
+</body>
+</html>
